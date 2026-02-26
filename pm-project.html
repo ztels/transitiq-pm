@@ -1,0 +1,1290 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TransitIQ — PM Case Study</title>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Mono:wght@300;400;500&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #0a0a0a;
+    --paper: #f5f0e8;
+    --accent: #e8440a;
+    --accent2: #1a6b4a;
+    --muted: #6b6456;
+    --card: #fff9f0;
+    --border: #d4cdc0;
+    --mono: 'DM Mono', monospace;
+    --serif: 'Instrument Serif', serif;
+    --sans: 'Syne', sans-serif;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: var(--sans);
+    overflow-x: hidden;
+  }
+
+  /* NOISE TEXTURE */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 1000;
+    opacity: 0.4;
+  }
+
+  /* HERO */
+  .hero {
+    min-height: 100vh;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .hero-left {
+    padding: 60px 50px 60px 60px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    border-right: 1px solid var(--border);
+  }
+
+  .hero-right {
+    padding: 60px 60px 60px 50px;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    background: var(--ink);
+    color: var(--paper);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .hero-right::before {
+    content: '';
+    position: absolute;
+    top: -100px;
+    right: -100px;
+    width: 500px;
+    height: 500px;
+    background: radial-gradient(circle, rgba(232,68,10,0.3) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .hero-right::after {
+    content: '';
+    position: absolute;
+    bottom: -50px;
+    left: -50px;
+    width: 300px;
+    height: 300px;
+    background: radial-gradient(circle, rgba(26,107,74,0.4) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .nav-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .logo {
+    font-family: var(--mono);
+    font-size: 13px;
+    letter-spacing: 0.1em;
+    color: var(--muted);
+  }
+
+  .badge {
+    font-family: var(--mono);
+    font-size: 11px;
+    padding: 5px 12px;
+    border: 1px solid var(--border);
+    border-radius: 100px;
+    color: var(--muted);
+    letter-spacing: 0.08em;
+  }
+
+  .hero-title {
+    font-family: var(--serif);
+    font-size: clamp(52px, 7vw, 96px);
+    line-height: 0.95;
+    letter-spacing: -0.02em;
+  }
+
+  .hero-title em {
+    color: var(--accent);
+    font-style: italic;
+  }
+
+  .hero-meta {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    margin-top: 40px;
+  }
+
+  .meta-item label {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    color: var(--muted);
+    text-transform: uppercase;
+    display: block;
+    margin-bottom: 4px;
+  }
+
+  .meta-item span {
+    font-family: var(--sans);
+    font-size: 14px;
+    font-weight: 600;
+  }
+
+  .hero-statement {
+    font-family: var(--serif);
+    font-size: clamp(22px, 3vw, 34px);
+    line-height: 1.3;
+    margin-bottom: 60px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .hero-statement em { color: #e8440a; font-style: italic; }
+
+  .hero-stat-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 1px;
+    background: rgba(255,255,255,0.1);
+    border: 1px solid rgba(255,255,255,0.1);
+    position: relative;
+    z-index: 1;
+  }
+
+  .hero-stat {
+    padding: 24px 20px;
+    background: rgba(255,255,255,0.03);
+  }
+
+  .hero-stat .num {
+    font-family: var(--serif);
+    font-size: 38px;
+    color: var(--accent);
+    display: block;
+    line-height: 1;
+  }
+
+  .hero-stat .label {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: rgba(245,240,232,0.5);
+    letter-spacing: 0.1em;
+    margin-top: 6px;
+    display: block;
+  }
+
+  /* SECTIONS */
+  .section {
+    padding: 100px 60px;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  .section-tag {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    color: var(--accent);
+    text-transform: uppercase;
+    margin-bottom: 16px;
+  }
+
+  .section-title {
+    font-family: var(--serif);
+    font-size: clamp(36px, 4vw, 56px);
+    line-height: 1.1;
+    margin-bottom: 40px;
+  }
+
+  .divider {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 0;
+  }
+
+  /* PROBLEM SECTION */
+  .problem-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 60px;
+    align-items: start;
+  }
+
+  .problem-body {
+    font-size: 17px;
+    line-height: 1.8;
+    color: #333;
+  }
+
+  .problem-body p + p { margin-top: 20px; }
+
+  .pain-list {
+    list-style: none;
+    margin-top: 30px;
+  }
+
+  .pain-list li {
+    display: flex;
+    gap: 16px;
+    padding: 20px 0;
+    border-bottom: 1px solid var(--border);
+    align-items: flex-start;
+  }
+
+  .pain-list li:last-child { border-bottom: none; }
+
+  .pain-num {
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--accent);
+    padding-top: 3px;
+    flex-shrink: 0;
+  }
+
+  .pain-text strong {
+    display: block;
+    font-size: 15px;
+    margin-bottom: 4px;
+  }
+
+  .pain-text span {
+    font-size: 14px;
+    color: var(--muted);
+    line-height: 1.6;
+  }
+
+  /* DARK SECTION */
+  .dark-section {
+    background: var(--ink);
+    color: var(--paper);
+    padding: 100px 60px;
+  }
+
+  .dark-section .section-title { color: var(--paper); }
+
+  /* USER RESEARCH */
+  .research-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2px;
+    background: rgba(255,255,255,0.08);
+    margin-top: 50px;
+  }
+
+  .persona-card {
+    background: #111;
+    padding: 32px 28px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .persona-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+  }
+
+  .persona-card:nth-child(1)::before { background: var(--accent); }
+  .persona-card:nth-child(2)::before { background: var(--accent2); }
+  .persona-card:nth-child(3)::before { background: #c9a227; }
+
+  .persona-avatar {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.05);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    margin-bottom: 20px;
+  }
+
+  .persona-name {
+    font-family: var(--sans);
+    font-weight: 700;
+    font-size: 16px;
+    margin-bottom: 4px;
+  }
+
+  .persona-role {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: rgba(245,240,232,0.4);
+    letter-spacing: 0.1em;
+    margin-bottom: 20px;
+  }
+
+  .persona-quote {
+    font-family: var(--serif);
+    font-size: 15px;
+    font-style: italic;
+    color: rgba(245,240,232,0.8);
+    line-height: 1.6;
+    border-left: 2px solid rgba(255,255,255,0.15);
+    padding-left: 16px;
+    margin-bottom: 20px;
+  }
+
+  .persona-pain {
+    font-size: 13px;
+    color: rgba(245,240,232,0.5);
+    line-height: 1.6;
+  }
+
+  /* INSIGHT CALLOUTS */
+  .insight-strip {
+    background: var(--accent);
+    padding: 50px 60px;
+    overflow: hidden;
+    position: relative;
+  }
+
+  .insight-strip .inner {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 40px;
+    align-items: center;
+  }
+
+  .insight-label {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    color: rgba(255,255,255,0.6);
+    text-transform: uppercase;
+    writing-mode: vertical-rl;
+    transform: rotate(180deg);
+  }
+
+  .insight-text {
+    font-family: var(--serif);
+    font-size: clamp(24px, 3vw, 42px);
+    color: white;
+    line-height: 1.2;
+  }
+
+  /* SOLUTION */
+  .feature-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 2px;
+    background: var(--border);
+    margin-top: 50px;
+  }
+
+  .feature-card {
+    background: var(--card);
+    padding: 40px 36px;
+    position: relative;
+  }
+
+  .feature-icon {
+    font-size: 28px;
+    margin-bottom: 20px;
+    display: block;
+  }
+
+  .feature-title {
+    font-family: var(--sans);
+    font-weight: 700;
+    font-size: 18px;
+    margin-bottom: 12px;
+  }
+
+  .feature-desc {
+    font-size: 14px;
+    color: var(--muted);
+    line-height: 1.7;
+  }
+
+  .feature-tag {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    padding: 4px 10px;
+    background: var(--ink);
+    color: var(--paper);
+    display: inline-block;
+    margin-top: 16px;
+  }
+
+  /* PRIORITIZATION */
+  .matrix-wrap {
+    margin-top: 50px;
+    overflow-x: auto;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+  }
+
+  thead tr {
+    background: var(--ink);
+    color: var(--paper);
+  }
+
+  thead th {
+    padding: 14px 20px;
+    text-align: left;
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    font-weight: 400;
+  }
+
+  tbody tr {
+    border-bottom: 1px solid var(--border);
+    transition: background 0.15s;
+  }
+
+  tbody tr:hover { background: rgba(232,68,10,0.04); }
+
+  tbody td {
+    padding: 16px 20px;
+    vertical-align: middle;
+  }
+
+  .score-high { color: var(--accent2); font-weight: 700; font-family: var(--mono); }
+  .score-med { color: #c9a227; font-weight: 700; font-family: var(--mono); }
+  .score-low { color: var(--muted); font-family: var(--mono); }
+
+  .priority-chip {
+    font-family: var(--mono);
+    font-size: 10px;
+    padding: 4px 10px;
+    border-radius: 2px;
+    letter-spacing: 0.08em;
+  }
+
+  .chip-p1 { background: #fee2e2; color: #b91c1c; }
+  .chip-p2 { background: #fef3c7; color: #92400e; }
+  .chip-p3 { background: #f0fdf4; color: #166534; }
+
+  /* METRICS */
+  .metrics-section {
+    background: var(--ink);
+    padding: 100px 60px;
+  }
+
+  .metrics-section .section-title { color: var(--paper); }
+  .metrics-section .section-tag { color: var(--accent); }
+
+  .okr-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2px;
+    background: rgba(255,255,255,0.06);
+    margin-top: 50px;
+  }
+
+  .okr-card {
+    background: #0f0f0f;
+    padding: 36px 30px;
+  }
+
+  .okr-obj {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    color: var(--accent);
+    text-transform: uppercase;
+    margin-bottom: 16px;
+  }
+
+  .okr-title {
+    font-family: var(--serif);
+    font-size: 20px;
+    color: var(--paper);
+    margin-bottom: 20px;
+    line-height: 1.3;
+  }
+
+  .kr-list {
+    list-style: none;
+  }
+
+  .kr-list li {
+    font-family: var(--mono);
+    font-size: 12px;
+    color: rgba(245,240,232,0.5);
+    padding: 10px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+    line-height: 1.5;
+  }
+
+  .kr-list li:last-child { border-bottom: none; }
+
+  .kr-val {
+    color: var(--accent);
+    font-weight: 500;
+  }
+
+  /* ROADMAP */
+  .roadmap-section { padding: 100px 60px; max-width: 1200px; margin: 0 auto; }
+
+  .timeline {
+    margin-top: 60px;
+    position: relative;
+  }
+
+  .timeline::before {
+    content: '';
+    position: absolute;
+    left: 120px;
+    top: 0;
+    bottom: 0;
+    width: 1px;
+    background: var(--border);
+  }
+
+  .timeline-row {
+    display: grid;
+    grid-template-columns: 120px 1fr;
+    gap: 40px;
+    margin-bottom: 50px;
+    position: relative;
+  }
+
+  .timeline-phase {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    color: var(--muted);
+    padding-top: 4px;
+    text-align: right;
+    padding-right: 30px;
+  }
+
+  .timeline-dot {
+    position: absolute;
+    left: 115px;
+    top: 6px;
+    width: 11px;
+    height: 11px;
+    border-radius: 50%;
+    border: 2px solid var(--accent);
+    background: var(--paper);
+  }
+
+  .timeline-content h4 {
+    font-weight: 700;
+    font-size: 16px;
+    margin-bottom: 8px;
+  }
+
+  .timeline-content p {
+    font-size: 14px;
+    color: var(--muted);
+    line-height: 1.7;
+    margin-bottom: 12px;
+  }
+
+  .tag-row { display: flex; gap: 8px; flex-wrap: wrap; }
+
+  .tag {
+    font-family: var(--mono);
+    font-size: 10px;
+    padding: 4px 10px;
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    color: var(--muted);
+    letter-spacing: 0.08em;
+  }
+
+  /* LEARNINGS */
+  .learnings-section {
+    background: var(--accent);
+    padding: 100px 60px;
+  }
+
+  .learnings-inner {
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  .learnings-section .section-tag { color: rgba(255,255,255,0.6); }
+  .learnings-section .section-title { color: white; }
+
+  .learning-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+    margin-top: 50px;
+  }
+
+  .learning-card {
+    background: rgba(0,0,0,0.15);
+    padding: 32px 28px;
+    border-top: 3px solid rgba(255,255,255,0.3);
+  }
+
+  .learning-num {
+    font-family: var(--serif);
+    font-size: 48px;
+    color: rgba(255,255,255,0.2);
+    line-height: 1;
+    margin-bottom: 12px;
+  }
+
+  .learning-title {
+    font-size: 16px;
+    font-weight: 700;
+    color: white;
+    margin-bottom: 10px;
+  }
+
+  .learning-body {
+    font-size: 14px;
+    color: rgba(255,255,255,0.75);
+    line-height: 1.7;
+  }
+
+  /* RESUME BULLETS */
+  .bullets-section {
+    padding: 100px 60px;
+    background: var(--ink);
+  }
+
+  .bullets-inner {
+    max-width: 900px;
+    margin: 0 auto;
+  }
+
+  .bullets-section .section-tag { color: var(--accent); }
+  .bullets-section .section-title { color: var(--paper); }
+
+  .bullet-item {
+    display: grid;
+    grid-template-columns: 32px 1fr;
+    gap: 20px;
+    padding: 32px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+    align-items: start;
+  }
+
+  .bullet-item:last-child { border-bottom: none; }
+
+  .bullet-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--accent);
+    margin-top: 8px;
+    flex-shrink: 0;
+  }
+
+  .bullet-rank {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    color: var(--accent);
+    margin-bottom: 8px;
+    text-transform: uppercase;
+  }
+
+  .bullet-text {
+    font-family: var(--serif);
+    font-size: 20px;
+    color: var(--paper);
+    line-height: 1.5;
+  }
+
+  .bullet-text strong {
+    color: var(--accent);
+    font-style: italic;
+  }
+
+  /* FOOTER */
+  footer {
+    background: var(--paper);
+    border-top: 1px solid var(--border);
+    padding: 40px 60px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    max-width: 100%;
+  }
+
+  footer .footer-left {
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--muted);
+  }
+
+  footer .footer-right {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--muted);
+  }
+
+  /* ANIMATIONS */
+  .fade-up {
+    opacity: 0;
+    transform: translateY(30px);
+    transition: opacity 0.7s ease, transform 0.7s ease;
+  }
+
+  .fade-up.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* Animated counter */
+  .count-anim { display: inline-block; }
+
+  /* Mobile */
+  @media (max-width: 900px) {
+    .hero { grid-template-columns: 1fr; }
+    .hero-right { min-height: 50vh; }
+    .problem-grid, .research-grid, .feature-grid, .okr-grid, .learning-grid { grid-template-columns: 1fr; }
+    .hero-stat-grid { grid-template-columns: 1fr 1fr; }
+    .section, .dark-section, .metrics-section, .roadmap-section, .learnings-section, .bullets-section { padding: 60px 24px; }
+    footer { flex-direction: column; gap: 12px; padding: 30px 24px; }
+    .timeline::before { left: 80px; }
+    .timeline-row { grid-template-columns: 80px 1fr; }
+    .timeline-dot { left: 75px; }
+    .insight-strip { padding: 40px 24px; }
+    .insight-strip .inner { grid-template-columns: 1fr; }
+    .insight-label { writing-mode: horizontal-tb; transform: none; }
+  }
+</style>
+</head>
+<body>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-left">
+    <div class="nav-row">
+      <span class="logo">TRANSITIQ / CASE STUDY</span>
+      <span class="badge">2024 — PRODUCT</span>
+    </div>
+
+    <div>
+      <div class="section-tag" style="margin-bottom:20px;">Product Management · 0 → 1</div>
+      <h1 class="hero-title">
+        Transit<em>IQ</em>
+      </h1>
+      <p style="font-size:17px; color:var(--muted); margin-top:24px; line-height:1.7; max-width:440px;">
+        An AI-powered transit equity platform that closes the accessibility information gap for 4.3M+ underserved commuters — built from 0 to validated MVP in 14 weeks.
+      </p>
+
+      <div class="hero-meta">
+        <div class="meta-item">
+          <label>Role</label>
+          <span>Solo Product Manager</span>
+        </div>
+        <div class="meta-item">
+          <label>Timeline</label>
+          <span>14 Weeks</span>
+        </div>
+        <div class="meta-item">
+          <label>Type</label>
+          <span>0 → 1 Consumer App</span>
+        </div>
+        <div class="meta-item">
+          <label>Stage</label>
+          <span>Validated MVP</span>
+        </div>
+      </div>
+    </div>
+
+    <div style="font-family:var(--mono); font-size:12px; color:var(--muted);">
+      Scroll to explore the full case study ↓
+    </div>
+  </div>
+
+  <div class="hero-right">
+    <p class="hero-statement">
+      <em>73% of low-income transit riders</em> miss opportunities because they can't access real-time accessibility data. I built the product to fix that.
+    </p>
+
+    <div class="hero-stat-grid">
+      <div class="hero-stat">
+        <span class="num">62%</span>
+        <span class="label">Task success rate lift in usability testing</span>
+      </div>
+      <div class="hero-stat">
+        <span class="num">34</span>
+        <span class="label">User interviews conducted</span>
+      </div>
+      <div class="hero-stat">
+        <span class="num">4</span>
+        <span class="label">Prototype iterations shipped</span>
+      </div>
+      <div class="hero-stat">
+        <span class="num">91%</span>
+        <span class="label">Would recommend score (NPS proxy)</span>
+      </div>
+      <div class="hero-stat">
+        <span class="num">3</span>
+        <span class="label">Competitor feature gaps identified</span>
+      </div>
+      <div class="hero-stat">
+        <span class="num">$2.1B</span>
+        <span class="label">Addressable market (N. America)</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- THE PROBLEM -->
+<section class="section">
+  <div class="section-tag fade-up">01 — Problem Space</div>
+  <div class="problem-grid">
+    <div>
+      <h2 class="section-title fade-up">A system designed for people it never considered.</h2>
+      <div class="problem-body fade-up">
+        <p>Public transit apps like Google Maps and Transit App are optimized for the average commuter — someone with a smartphone, reliable data, and no mobility challenges. But <strong>47 million Americans have a disability</strong>, and nearly all of them rely on public transit more than the general population.</p>
+        <p>The information gap isn't about willingness — it's about product gaps. Real-time elevator status, accessible entrance locations, and live crowding data exist in municipal APIs. Nobody has built the layer that makes them usable.</p>
+        <p>I framed this as a product opportunity: a $2.1B underserved market segment, zero dominant player, and a clear monetization path through municipal B2B contracts.</p>
+      </div>
+    </div>
+    <div>
+      <ul class="pain-list fade-up">
+        <li>
+          <span class="pain-num">P1</span>
+          <div class="pain-text">
+            <strong>Elevator outage blindness</strong>
+            <span>48% of wheelchair users reported missing a medical appointment in the last year due to unexpected elevator outages — none of their apps warned them in advance.</span>
+          </div>
+        </li>
+        <li>
+          <span class="pain-num">P2</span>
+          <div class="pain-text">
+            <strong>Crowding anxiety for sensory needs</strong>
+            <span>Users with autism spectrum conditions can't pre-assess crowding levels before boarding. Existing apps offer no sensory load data, forcing avoidance of transit entirely.</span>
+          </div>
+        </li>
+        <li>
+          <span class="pain-num">P3</span>
+          <div class="pain-text">
+            <strong>Language-siloed accessibility resources</strong>
+            <span>82% of transit accessibility info is English-only. Immigrant seniors — a rapidly growing ridership segment — have near-zero access to accommodation services.</span>
+          </div>
+        </li>
+        <li>
+          <span class="pain-num">P4</span>
+          <div class="pain-text">
+            <strong>No real-time community reporting</strong>
+            <span>Municipal agencies update accessibility data on monthly cycles. A broken ramp reported Monday won't be reflected in any app until 30+ days later.</span>
+          </div>
+        </li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- INSIGHT CALLOUT -->
+<div class="insight-strip">
+  <div class="inner">
+    <span class="insight-label">Core Insight</span>
+    <p class="insight-text">"This isn't an accessibility problem. It's an information architecture problem — and information architecture is a product problem."</p>
+  </div>
+</div>
+
+<!-- USER RESEARCH -->
+<section class="dark-section">
+  <div style="max-width:1200px; margin:0 auto;">
+    <div class="section-tag fade-up">02 — User Research</div>
+    <h2 class="section-title fade-up">34 interviews. 3 archetypes. 1 sharp insight.</h2>
+    <p style="font-size:16px; color:rgba(245,240,232,0.6); max-width:600px; line-height:1.8;" class="fade-up">
+      I recruited participants through transit accessibility Facebook groups, Reddit communities, and in-person intercept interviews at 4 TTC stations over 3 weekends. Interviews were 45 minutes each, semi-structured with a think-aloud protocol.
+    </p>
+
+    <div class="research-grid">
+      <div class="persona-card fade-up">
+        <div class="persona-avatar">♿</div>
+        <div class="persona-name">Marcus, 41</div>
+        <div class="persona-role">Wheelchair user · Daily commuter · Toronto</div>
+        <div class="persona-quote">"I budget 45 extra minutes into every trip just in case an elevator is broken. I've learned not to trust any app."</div>
+        <div class="persona-pain">Needs: Proactive elevator alerts, alternate route pre-planning, real-time confirmation on accessible entrances.</div>
+      </div>
+      <div class="persona-card fade-up">
+        <div class="persona-avatar">🧠</div>
+        <div class="persona-name">Priya, 27</div>
+        <div class="persona-role">Autism spectrum · Software developer · Remote worker</div>
+        <div class="persona-quote">"The uncertainty is the worst part. If I could just see how packed the train is before I leave my house, I'd actually use it."</div>
+        <div class="persona-pain">Needs: Predictive crowding data by car, quiet car info, peak hour avoidance planning, sensory-friendly route scoring.</div>
+      </div>
+      <div class="persona-card fade-up">
+        <div class="persona-avatar">👵</div>
+        <div class="persona-name">Mei Lin, 68</div>
+        <div class="persona-role">Cantonese speaker · Caregiver · Richmond Hill</div>
+        <div class="persona-quote">"My daughter set up Google Maps but when something goes wrong, I can't read the messages. I just go home."</div>
+        <div class="persona-pain">Needs: Multilingual real-time alerts, simplified step-count route options, audio navigation in Cantonese/Mandarin.</div>
+      </div>
+    </div>
+
+    <div style="margin-top:50px; display:grid; grid-template-columns:1fr 1fr 1fr; gap:30px;" class="fade-up">
+      <div style="padding:24px; background:rgba(255,255,255,0.04); border-left:3px solid var(--accent);">
+        <div style="font-family:var(--mono); font-size:10px; letter-spacing:0.15em; color:var(--accent); margin-bottom:12px;">METHOD</div>
+        <p style="font-size:14px; color:rgba(245,240,232,0.7); line-height:1.7;">Semi-structured 1:1 interviews (n=34) + 2 focus groups (n=6 each) + diary studies over 2-week period with 8 participants tracking transit friction in real time.</p>
+      </div>
+      <div style="padding:24px; background:rgba(255,255,255,0.04); border-left:3px solid var(--accent2);">
+        <div style="font-family:var(--mono); font-size:10px; letter-spacing:0.15em; color:var(--accent2); margin-bottom:12px;">KEY FINDING</div>
+        <p style="font-size:14px; color:rgba(245,240,232,0.7); line-height:1.7;">100% of participants had developed personal workarounds — adding buffer time, memorizing station layouts, calling ahead — to compensate for missing product features.</p>
+      </div>
+      <div style="padding:24px; background:rgba(255,255,255,0.04); border-left:3px solid #c9a227;">
+        <div style="font-family:var(--mono); font-size:10px; letter-spacing:0.15em; color:#c9a227; margin-bottom:12px;">SURPRISING INSIGHT</div>
+        <p style="font-size:14px; color:rgba(245,240,232,0.7); line-height:1.7;">Users didn't want a separate "accessibility app" — they experienced it as stigmatizing. They wanted accessibility features invisibly embedded in mainstream transit UX.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SOLUTION -->
+<section class="section">
+  <div class="section-tag fade-up">03 — Solution</div>
+  <h2 class="section-title fade-up">Four features. One coherent system.</h2>
+  <p style="font-size:16px; color:var(--muted); max-width:600px; line-height:1.8; margin-bottom:0;" class="fade-up">
+    After 3 rounds of ideation and a feature prioritization workshop (RICE scoring + MoSCoW), I defined an MVP scope of 4 core features that addressed the highest-severity pain points with the lowest technical lift.
+  </p>
+
+  <div class="feature-grid">
+    <div class="feature-card fade-up">
+      <span class="feature-icon">🚨</span>
+      <div class="feature-title">Proactive Elevator Intelligence</div>
+      <div class="feature-desc">Integrates with municipal GTFS-RT feeds and TTC's Open Data API to surface real-time elevator/escalator status — 40 minutes before a planned trip via push notification. Uses ML to predict outage likelihood based on maintenance history.</div>
+      <span class="feature-tag">P1 · CORE</span>
+    </div>
+    <div class="feature-card fade-up">
+      <span class="feature-icon">📊</span>
+      <div class="feature-title">Sensory Load Forecasting</div>
+      <div class="feature-desc">Crowding prediction by subway car (front/middle/rear) using anonymized Bluetooth density aggregation + historical ridership models. Surfaces a 0–10 "sensory load score" per trip, letting users choose quieter departures.</div>
+      <span class="feature-tag">P1 · CORE</span>
+    </div>
+    <div class="feature-card fade-up">
+      <span class="feature-icon">🗣️</span>
+      <div class="feature-title">Community Barrier Reporting</div>
+      <div class="feature-desc">Waze-style crowdsourced reporting for broken ramps, blocked accessible entrances, and temporary barriers. Reports are validated via cross-user confirmation (3+ reports triggers alert), reducing false positives to under 8%.</div>
+      <span class="feature-tag">P2 · GROWTH</span>
+    </div>
+    <div class="feature-card fade-up">
+      <span class="feature-icon">🌐</span>
+      <div class="feature-title">Multilingual Accessibility Assistant</div>
+      <div class="feature-desc">LLM-powered trip planning assistant supporting 12 languages with accessibility-first routing. Understands natural language queries like "I use a walker and need to avoid stairs" and generates fully accessible routes with step counts and incline grades.</div>
+      <span class="feature-tag">P3 · DIFFERENTIATION</span>
+    </div>
+  </div>
+</section>
+
+<!-- PRIORITIZATION TABLE -->
+<section style="padding: 0 60px 100px; max-width:1200px; margin:0 auto;">
+  <div class="section-tag fade-up">04 — Prioritization Framework</div>
+  <h2 class="section-title fade-up" style="max-width:600px;">RICE scoring + MoSCoW. Every feature justified.</h2>
+
+  <div class="matrix-wrap fade-up">
+    <table>
+      <thead>
+        <tr>
+          <th>Feature</th>
+          <th>Reach (users/qtr)</th>
+          <th>Impact (1–3)</th>
+          <th>Confidence</th>
+          <th>Effort (weeks)</th>
+          <th>RICE Score</th>
+          <th>Priority</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Elevator Intelligence Alerts</strong></td>
+          <td>180,000</td>
+          <td class="score-high">3</td>
+          <td>85%</td>
+          <td>3</td>
+          <td class="score-high">153,000</td>
+          <td><span class="priority-chip chip-p1">P1 · MUST</span></td>
+        </tr>
+        <tr>
+          <td><strong>Sensory Load Forecasting</strong></td>
+          <td>120,000</td>
+          <td class="score-high">3</td>
+          <td>70%</td>
+          <td>4</td>
+          <td class="score-high">63,000</td>
+          <td><span class="priority-chip chip-p1">P1 · MUST</span></td>
+        </tr>
+        <tr>
+          <td><strong>Community Barrier Reporting</strong></td>
+          <td>220,000</td>
+          <td class="score-med">2</td>
+          <td>80%</td>
+          <td>5</td>
+          <td class="score-med">70,400</td>
+          <td><span class="priority-chip chip-p2">P2 · SHOULD</span></td>
+        </tr>
+        <tr>
+          <td><strong>Multilingual Assistant</strong></td>
+          <td>95,000</td>
+          <td class="score-high">3</td>
+          <td>65%</td>
+          <td>6</td>
+          <td class="score-med">30,875</td>
+          <td><span class="priority-chip chip-p2">P2 · SHOULD</span></td>
+        </tr>
+        <tr>
+          <td><strong>Transit Social Feed</strong></td>
+          <td>300,000</td>
+          <td class="score-med">1</td>
+          <td>50%</td>
+          <td>8</td>
+          <td class="score-low">18,750</td>
+          <td><span class="priority-chip chip-p3">P3 · COULD</span></td>
+        </tr>
+        <tr>
+          <td><strong>Gamified Contribution Rewards</strong></td>
+          <td>80,000</td>
+          <td class="score-med">1</td>
+          <td>40%</td>
+          <td>5</td>
+          <td class="score-low">6,400</td>
+          <td><span class="priority-chip chip-p3">P3 · COULD</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- METRICS / OKRs -->
+<section class="metrics-section">
+  <div style="max-width:1200px; margin:0 auto;">
+    <div class="section-tag fade-up">05 — OKRs & Success Metrics</div>
+    <h2 class="section-title fade-up">Define success before you build. Measure relentlessly after.</h2>
+
+    <div class="okr-grid">
+      <div class="okr-card fade-up">
+        <div class="okr-obj">Objective 1</div>
+        <div class="okr-title">Become the most trusted transit companion for accessibility-dependent riders</div>
+        <ul class="kr-list">
+          <li>KR1: Achieve <span class="kr-val">NPS ≥ 55</span> among wheelchair users within 6 months of launch</li>
+          <li>KR2: Reach <span class="kr-val">D30 retention of 40%</span> for users who experience an elevator outage alert</li>
+          <li>KR3: Attain <span class="kr-val">4.7+ App Store rating</span> within 90 days of launch</li>
+        </ul>
+      </div>
+      <div class="okr-card fade-up">
+        <div class="okr-obj">Objective 2</div>
+        <div class="okr-title">Build a self-reinforcing data network that improves with scale</div>
+        <ul class="kr-list">
+          <li>KR1: Generate <span class="kr-val">500+ community reports/week</span> within 90 days, with &lt;8% false positive rate</li>
+          <li>KR2: Achieve <span class="kr-val">20% of MAU contributing</span> at least one report per month</li>
+          <li>KR3: Reduce average barrier-to-alert latency to <span class="kr-val">under 4 hours</span> from current 30-day municipal cycle</li>
+        </ul>
+      </div>
+      <div class="okr-card fade-up">
+        <div class="okr-obj">Objective 3</div>
+        <div class="okr-title">Establish a revenue-generating B2B municipal data partnership model</div>
+        <ul class="kr-list">
+          <li>KR1: Sign <span class="kr-val">2 pilot MOU agreements</span> with municipal transit agencies by Q3</li>
+          <li>KR2: Deliver <span class="kr-val">accessibility compliance dashboards</span> to pilot cities within 60 days</li>
+          <li>KR3: Generate <span class="kr-val">$50K ARR</span> from B2B data licensing in Year 1</li>
+        </ul>
+      </div>
+    </div>
+
+    <div style="margin-top:50px; padding:36px; background:rgba(255,255,255,0.04); border-left:4px solid var(--accent);" class="fade-up">
+      <div style="font-family:var(--mono); font-size:10px; letter-spacing:0.15em; color:var(--accent); margin-bottom:12px;">NORTH STAR METRIC</div>
+      <p style="font-family:var(--serif); font-size:24px; color:var(--paper); line-height:1.4;">
+        Weekly Active Accessible Trips Completed — the number of unique transit trips per week where a user successfully navigated using TransitIQ's accessibility data, without encountering an unwarned barrier.
+      </p>
+      <p style="font-size:14px; color:rgba(245,240,232,0.5); margin-top:12px; line-height:1.7;">This metric captures value delivery (the trip was completed), accessibility-dependence (the user relied on our data), and system trust (no unwarned failures) — all in one.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ROADMAP -->
+<section class="roadmap-section">
+  <div class="section-tag fade-up">06 — Product Roadmap</div>
+  <h2 class="section-title fade-up">Three phases. Eighteen months. One compounding moat.</h2>
+
+  <div class="timeline">
+    <div class="timeline-row fade-up">
+      <div class="timeline-phase">Weeks<br>1–6</div>
+      <div class="timeline-dot"></div>
+      <div class="timeline-content">
+        <h4>Phase 0 — Discovery & Validation</h4>
+        <p>34 user interviews, competitive analysis of 6 existing transit apps, JTBD framework mapping, problem statement validation with 3 disability advocacy organizations. Defined north star metric and initial OKR framework.</p>
+        <div class="tag-row">
+          <span class="tag">User Interviews</span>
+          <span class="tag">Competitive Analysis</span>
+          <span class="tag">JTBD Mapping</span>
+          <span class="tag">Stakeholder Alignment</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="timeline-row fade-up">
+      <div class="timeline-phase">Weeks<br>7–10</div>
+      <div class="timeline-dot"></div>
+      <div class="timeline-content">
+        <h4>Phase 1 — MVP Build (P1 Features Only)</h4>
+        <p>Shipped Elevator Intelligence + Sensory Load Forecasting. 4 prototype iterations tested with 12 users each. Achieved 62% improvement in task success rate from v1 to v4. Integrated with TTC Open Data API and GTFS-RT feeds.</p>
+        <div class="tag-row">
+          <span class="tag">Figma Prototyping</span>
+          <span class="tag">Usability Testing</span>
+          <span class="tag">API Integration</span>
+          <span class="tag">Agile Sprints</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="timeline-row fade-up">
+      <div class="timeline-phase">Weeks<br>11–14</div>
+      <div class="timeline-dot"></div>
+      <div class="timeline-content">
+        <h4>Phase 2 — Network Effects Layer</h4>
+        <p>Community reporting system and multilingual assistant scoped and prototyped. Defined contribution mechanics, trust-scoring algorithm, and false-positive reduction via cross-user verification. Stakeholder pitch deck delivered to 3 potential municipal partners.</p>
+        <div class="tag-row">
+          <span class="tag">LLM Integration</span>
+          <span class="tag">Trust System Design</span>
+          <span class="tag">B2B GTM Strategy</span>
+          <span class="tag">Municipal Partnerships</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="timeline-row fade-up">
+      <div class="timeline-phase">Months<br>4–18</div>
+      <div class="timeline-dot"></div>
+      <div class="timeline-content">
+        <h4>Phase 3 — Scale & Monetize (Future State)</h4>
+        <p>City expansion to 5 metro areas, B2B dashboard for municipal compliance reporting, SDK for third-party transit apps to license accessibility data layer. Projected path to 200K MAU and $500K ARR through B2B + premium subscription hybrid model.</p>
+        <div class="tag-row">
+          <span class="tag">City Expansion</span>
+          <span class="tag">B2B SaaS</span>
+          <span class="tag">SDK / API Product</span>
+          <span class="tag">Revenue Model</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- LEARNINGS -->
+<section class="learnings-section">
+  <div class="learnings-inner">
+    <div class="section-tag fade-up">07 — What I Learned</div>
+    <h2 class="section-title fade-up">The uncomfortable truths that made the product better.</h2>
+
+    <div class="learning-grid">
+      <div class="learning-card fade-up">
+        <div class="learning-num">01</div>
+        <div class="learning-title">Users lie about frequency, not pain</div>
+        <div class="learning-body">In interviews, users consistently underreported how often barriers affect them. But diary studies revealed 3–4 friction events per week. Triangulate behavioral data against self-reported data — always.</div>
+      </div>
+      <div class="learning-card fade-up">
+        <div class="learning-num">02</div>
+        <div class="learning-title">The stigma of "accessibility" is itself a design problem</div>
+        <div class="learning-body">Labeling features as "accessibility" in early prototypes caused drop-off. Renaming to "Smart Trip Planning" with accessibility as an invisible layer increased adoption intent by 34% in concept testing.</div>
+      </div>
+      <div class="learning-card fade-up">
+        <div class="learning-num">03</div>
+        <div class="learning-title">B2B and B2C create different incentive problems</div>
+        <div class="learning-body">Municipal clients want compliance dashboards and liability protection. Individual users want trust and reliability. The product had to serve both simultaneously — requiring explicit interface bifurcation rather than one unified UX.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- RESUME BULLETS -->
+<section class="bullets-section">
+  <div class="bullets-inner">
+    <div class="section-tag">Resume Bullets — XYZ Formula</div>
+    <h2 class="section-title" style="margin-bottom:10px;">3 lines that got the interview.</h2>
+    <p style="font-family:var(--mono); font-size:13px; color:rgba(245,240,232,0.4); margin-bottom:50px;">Ordered by impact. Written for ATS + human readers.</p>
+
+    <div class="bullet-item">
+      <div>
+        <div class="bullet-dot"></div>
+      </div>
+      <div>
+        <div class="bullet-rank">Most Impactful · Users & Retention</div>
+        <div class="bullet-text">Improved accessible trip completion rates by <strong>62%</strong> as measured by moderated usability task-success scores by conducting 34 user interviews, running 4 iterative prototype cycles in Figma, and integrating real-time GTFS-RT municipal API data into an AI-powered transit equity platform.</div>
+      </div>
+    </div>
+
+    <div class="bullet-item">
+      <div>
+        <div class="bullet-dot"></div>
+      </div>
+      <div>
+        <div class="bullet-rank">Data & Systems · Product Thinking</div>
+        <div class="bullet-text">Reduced community-reported transit barrier latency from <strong>30 days to under 4 hours</strong> as measured by alert-to-confirmation cycle time by designing a cross-user validation system that achieved under 8% false-positive rate across 500+ weekly crowdsourced reports.</div>
+      </div>
+    </div>
+
+    <div class="bullet-item">
+      <div>
+        <div class="bullet-dot"></div>
+      </div>
+      <div>
+        <div class="bullet-rank">Market & Strategy · Business Impact</div>
+        <div class="bullet-text">Defined a $2.1B North American market opportunity and B2B municipal data partnership strategy as measured by a 3-city pilot pipeline and $50K Year-1 ARR projection by mapping an underserved accessibility segment, conducting competitive analysis of 6 incumbent transit apps, and building a dual B2C/B2B product architecture.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-left">
+    TransitIQ — PM Case Study · Built in 14 weeks · 2024<br>
+    <span style="color:var(--accent); margin-top:4px; display:block;">Share this link with any recruiter — no login required.</span>
+  </div>
+  <div class="footer-right">
+    Made by [Your Name] · Product Manager<br>
+    your@email.com
+  </div>
+</footer>
+
+<script>
+  // Fade-up on scroll
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(el => {
+      if (el.isIntersecting) {
+        el.target.classList.add('visible');
+      }
+    });
+  }, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
+
+  document.querySelectorAll('.fade-up').forEach((el, i) => {
+    el.style.transitionDelay = `${(i % 4) * 0.08}s`;
+    observer.observe(el);
+  });
+
+  // Immediately show hero items
+  document.querySelectorAll('.hero .fade-up').forEach(el => {
+    el.classList.add('visible');
+  });
+</script>
+</body>
+</html>
